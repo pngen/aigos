@@ -1,0 +1,16 @@
+# AIGOS Configuration Sample
+version: "1.0.0"
+
+meshes:
+  mesh1:
+    layers:
+      - dio
+      - zt-aas
+      - icae
+  mesh2:
+    layers:
+      - gsas
+      - able
+options:
+  logging: structured
+  restart: on-failure
