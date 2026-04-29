@@ -7,10 +7,14 @@ meshes:
       - dio
       - zt-aas
       - icae
-  mesh2:
-    layers:
+      - poc
+      - fak
+      - are
+      - jib
+      - icl
       - gsas
       - able
+
 options:
   logging: structured
   restart: on-failure

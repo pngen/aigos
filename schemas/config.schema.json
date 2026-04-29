@@ -22,12 +22,11 @@
               "minItems": 1,
               "items": {
                 "type": "string",
-                "enum": ["able", "are", "dio", "fak", "gsas", "icae", "icl", "jib", "poc", "zt-aas"]
+                "enum": ["dio", "zt-aas", "icae", "poc", "fak", "are", "jib", "icl", "gsas", "able"]
               },
               "uniqueItems": true
             }
-          },
-          "required": ["layers"]
+          }
         }
       }
     },
