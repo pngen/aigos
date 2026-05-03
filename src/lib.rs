@@ -8,6 +8,42 @@ pub const CANONICAL_EXTENSION_LAYERS: &[&str] = &[
     // Future unlocked extension layers go here.
 ];
 
+const _: () = assert_extension_layers_do_not_redefine_core();
+
+const fn assert_extension_layers_do_not_redefine_core() {
+    let mut extension_index = 0;
+    while extension_index < CANONICAL_EXTENSION_LAYERS.len() {
+        let extension_layer = CANONICAL_EXTENSION_LAYERS[extension_index];
+        let mut core_index = 0;
+        while core_index < CANONICAL_CORE_LAYERS.len() {
+            if layer_names_eq(extension_layer, CANONICAL_CORE_LAYERS[core_index]) {
+                panic!("Core layers must not be redefined in CANONICAL_EXTENSION_LAYERS");
+            }
+            core_index += 1;
+        }
+        extension_index += 1;
+    }
+}
+
+const fn layer_names_eq(left: &str, right: &str) -> bool {
+    let left = left.as_bytes();
+    let right = right.as_bytes();
+
+    if left.len() != right.len() {
+        return false;
+    }
+
+    let mut index = 0;
+    while index < left.len() {
+        if left[index] != right[index] {
+            return false;
+        }
+        index += 1;
+    }
+
+    true
+}
+
 #[deprecated(
     note = "Use CANONICAL_CORE_LAYERS for mandatory Core or canonical_layers() for Core + extensions"
 )]
