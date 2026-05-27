@@ -89,4 +89,14 @@ mod tests {
             assert!(!is_extension_layer(layer));
         }
     }
+
+    #[test]
+    fn extension_layers_do_not_redefine_core_layers() {
+        for extension_layer in CANONICAL_EXTENSION_LAYERS {
+            assert!(
+                !CANONICAL_CORE_LAYERS.contains(extension_layer),
+                "{extension_layer} is already a mandatory Core layer"
+            );
+        }
+    }
 }
