@@ -12,6 +12,7 @@
     "meshes": {
       "type": "object",
       "minProperties": 1,
+      "additionalProperties": false,
       "patternProperties": {
         "^[a-zA-Z0-9_-]+$": {
           "type": "object",
@@ -19,7 +20,8 @@
           "properties": {
             "layers": {
               "type": "array",
-              "minItems": 1,
+              "minItems": 10,
+              "maxItems": 10,
               "items": {
                 "type": "string",
                 "enum": ["dio", "zt-aas", "icae", "poc", "fak", "are", "jib", "icl", "gsas", "able"]

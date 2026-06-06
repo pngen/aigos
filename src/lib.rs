@@ -99,4 +99,33 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn public_config_schema_enforces_all_or_none_core_layers() {
+        let schema: serde_json::Value =
+            serde_json::from_str(include_str!("../schemas/config.schema.json"))
+                .expect("config schema should parse");
+
+        let meshes = &schema["properties"]["meshes"];
+        assert_eq!(meshes["additionalProperties"], serde_json::json!(false));
+
+        let layer_schema = &meshes["patternProperties"]["^[a-zA-Z0-9_-]+$"]["properties"]["layers"];
+        assert_eq!(
+            layer_schema["minItems"],
+            serde_json::json!(CANONICAL_CORE_LAYERS.len())
+        );
+        assert_eq!(
+            layer_schema["maxItems"],
+            serde_json::json!(CANONICAL_CORE_LAYERS.len())
+        );
+        assert_eq!(layer_schema["uniqueItems"], serde_json::json!(true));
+
+        let schema_layers = layer_schema["items"]["enum"]
+            .as_array()
+            .expect("layer enum should be an array")
+            .iter()
+            .map(|value| value.as_str().expect("layer enum values should be strings"))
+            .collect::<Vec<_>>();
+        assert_eq!(schema_layers, CANONICAL_CORE_LAYERS);
+    }
 }
