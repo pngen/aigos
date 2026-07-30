@@ -63,7 +63,7 @@ For backward compatibility, a mesh may list all ten Core layers. AIGOSD still ru
 2. Update `schemas/config.schema.json` only for public Core schema changes. Private extension builds may ship their own unlocked schema separately.
 3. Build `aigos`.
 4. Recompile `aigosd`.
-5. Place `aigosd`, `config.yaml`, all Core binaries, and configured extension binaries in the runtime bundle.
+5. Place `aigosd`, `config.yaml`, all Core binaries, and every extension binary named by the compiled `CANONICAL_EXTENSION_LAYERS` registry in the runtime bundle.
 6. Run `aigosd`.
 
 Changes are only recognized after recompilation.

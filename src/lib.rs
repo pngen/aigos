@@ -73,6 +73,18 @@ pub fn is_extension_layer(name: &str) -> bool {
 mod tests {
     use super::*;
 
+    const PUBLIC_MESH_NAME_PATTERN: &str = "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$";
+    const LOG_FILE_LEXICAL_GUARDS: &[&str] = &[
+        "^(?:[\\\\/]|[A-Za-z]:)",
+        "(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)",
+        "^(?:\\.(?:[\\\\/]+|$))+$",
+    ];
+
+    fn public_config_schema() -> serde_json::Value {
+        serde_json::from_str(include_str!("../schemas/config.schema.json"))
+            .expect("config schema should parse")
+    }
+
     #[test]
     fn canonical_layers_are_derived_from_core_and_extensions() {
         let mut expected = CANONICAL_CORE_LAYERS.to_vec();
@@ -101,15 +113,53 @@ mod tests {
     }
 
     #[test]
+    fn public_config_schema_accepts_only_the_supported_version() {
+        let schema = public_config_schema();
+        let version = &schema["properties"]["version"];
+
+        assert_eq!(version["const"], serde_json::json!(VERSION));
+        assert!(version.get("pattern").is_none());
+    }
+
+    #[test]
+    fn public_config_schema_uses_the_runtime_mesh_identity_grammar() {
+        let schema = public_config_schema();
+        let patterns = schema["properties"]["meshes"]["patternProperties"]
+            .as_object()
+            .expect("mesh patternProperties should be an object");
+
+        assert_eq!(patterns.len(), 1);
+        assert!(patterns.contains_key(PUBLIC_MESH_NAME_PATTERN));
+    }
+
+    #[test]
+    fn public_config_schema_rejects_lexically_unsafe_log_paths() {
+        let schema = public_config_schema();
+        let log_file = &schema["properties"]["options"]["properties"]["log_file"];
+
+        assert_eq!(log_file["minLength"], serde_json::json!(1));
+        let guards = log_file["allOf"]
+            .as_array()
+            .expect("log_file allOf should be an array")
+            .iter()
+            .map(|guard| {
+                guard["not"]["pattern"]
+                    .as_str()
+                    .expect("log path guard should be a pattern")
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(guards, LOG_FILE_LEXICAL_GUARDS);
+    }
+
+    #[test]
     fn public_config_schema_enforces_all_or_none_core_layers() {
-        let schema: serde_json::Value =
-            serde_json::from_str(include_str!("../schemas/config.schema.json"))
-                .expect("config schema should parse");
+        let schema = public_config_schema();
 
         let meshes = &schema["properties"]["meshes"];
         assert_eq!(meshes["additionalProperties"], serde_json::json!(false));
 
-        let layer_schema = &meshes["patternProperties"]["^[a-zA-Z0-9_-]+$"]["properties"]["layers"];
+        let layer_schema =
+            &meshes["patternProperties"][PUBLIC_MESH_NAME_PATTERN]["properties"]["layers"];
         assert_eq!(
             layer_schema["minItems"],
             serde_json::json!(CANONICAL_CORE_LAYERS.len())
